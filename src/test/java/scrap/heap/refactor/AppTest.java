@@ -3,12 +3,133 @@
  */
 package scrap.heap.refactor;
 
+import org.junit.Assert;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import scrap.heap.refactor.domain.Balloon;
+import scrap.heap.refactor.domain.Cake;
+
+import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
 
 public class AppTest {
-    @Test public void testAppHasAGreeting() {
+    @Test
+    public void testAppHasAGreeting() {
         App classUnderTest = new App();
         assertNotNull("app should have a greeting", classUnderTest.getGreeting());
     }
+
+    @Test
+    public void testMakeBalloon() {
+        {
+            boolean caughtExpectedEx = false;
+            try {
+                new Balloon.Builder().build();
+            } catch (UnsupportedOperationException ex) {
+                caughtExpectedEx = true;
+            }
+            Assert.assertTrue(caughtExpectedEx);
+        }
+        {
+            Balloon balloon = new Balloon.Builder().withColor(Balloon.Color.BLUE).withMaterial(Balloon.Material.LATEX).build();
+            Assert.assertEquals(Balloon.Color.BLUE, balloon.getColor());
+            Assert.assertEquals(Balloon.Material.LATEX, balloon.getMaterial());
+        }
+    }
+
+    @Test
+    public void testMakeCake() {
+        {
+            boolean caughtExpectedEx = false;
+            try {
+                new Cake.Builder().build();
+            } catch (UnsupportedOperationException ex) {
+                caughtExpectedEx = true;
+            }
+            Assert.assertTrue(caughtExpectedEx);
+        }
+        {
+            boolean caughtExpectedEx = false;
+            try {
+                new Cake.Builder().withColor(Cake.Color.BROWN).build();
+            } catch (UnsupportedOperationException ex) {
+                caughtExpectedEx = true;
+            }
+            Assert.assertTrue(caughtExpectedEx);
+        }
+        {
+            final Cake cake = new Cake.Builder().withColor(Cake.Color.BROWN).withFlavor(Cake.Flavor.CHOCOLATE).
+                    withFrostingFlavor(Cake.FrostingFlavor.VANILLA).withShape(Cake.Shape.CIRCLE).withSize(Cake.Size.LARGE).build();
+
+            Assert.assertEquals(Cake.Color.BROWN, cake.getColor());
+            Assert.assertEquals(Cake.Flavor.CHOCOLATE, cake.getFlavor());
+            Assert.assertEquals(Cake.FrostingFlavor.VANILLA, cake.getFrostingFlavor());
+            Assert.assertEquals(Cake.Shape.CIRCLE, cake.getShape());
+            Assert.assertEquals(Cake.Size.LARGE, cake.getSize());
+        }
+    }
+
+    @Test
+    public void testOrderCake() {
+        final App app = new App();
+        final Cake cake = new Cake.Builder().withColor(Cake.Color.BROWN).withFlavor(Cake.Flavor.CHOCOLATE).
+                withFrostingFlavor(Cake.FrostingFlavor.VANILLA).withShape(Cake.Shape.CIRCLE).withSize(Cake.Size.LARGE).build();
+        final String confMsg = app.orderCake(cake);
+        Assert.assertNotNull(confMsg);
+        System.out.println(confMsg);
+    }
+
+    @Test
+    public void testOrderBalloons() {
+        final App app = new App();
+
+        final Map<Balloon, Integer> balloons = Map.of(
+                new Balloon.Builder().withMaterial(Balloon.Material.LATEX).withColor(Balloon.Color.BLUE).build(), 2,
+                new Balloon.Builder().withMaterial(Balloon.Material.MYLAR).withColor(Balloon.Color.RED).build(), 1);
+
+        final String confMsg = app.orderBalloons(balloons);
+        Assert.assertNotNull(confMsg);
+        System.out.println(confMsg);
+    }
+
+    @Test
+    public void testOrder() {
+        final App app = new App();
+        //Note : these are conversions of the sample orders that were defined in the main method of the app
+        {
+            final Map<Balloon, Integer> balloons = Map.of(
+                    new Balloon.Builder().withMaterial(Balloon.Material.MYLAR).withColor(Balloon.Color.RED).build(),
+                    4);
+            final Cake cake = new Cake.Builder().withColor(Cake.Color.BROWN).withFlavor(Cake.Flavor.CHOCOLATE).
+                    withFrostingFlavor(Cake.FrostingFlavor.CHOCOLATE).withShape(Cake.Shape.CIRCLE).withSize(Cake.Size.LARGE).build();
+
+            final String confMsg = app.order(balloons, cake);
+            Assert.assertNotNull(confMsg);
+            System.out.println(confMsg);
+        }
+
+        {
+            final Map<Balloon, Integer> balloons = Map.of(
+                    new Balloon.Builder().withMaterial(Balloon.Material.LATEX).withColor(Balloon.Color.BLUE).build(),
+                    7);
+            final Cake cake = new Cake.Builder().withColor(Cake.Color.BROWN).withFlavor(Cake.Flavor.VANILLA).
+                    withFrostingFlavor(Cake.FrostingFlavor.CHOCOLATE).withShape(Cake.Shape.SQUARE).withSize(Cake.Size.MED).build();
+
+            final String confMsg = app.order(balloons, cake);
+            Assert.assertNotNull(confMsg);
+            System.out.println(confMsg);
+        }
+        {
+            final Map<Balloon, Integer> balloons = Map.of(
+                    new Balloon.Builder().withMaterial(Balloon.Material.MYLAR).withColor(Balloon.Color.YELLOW).build(),
+                    4);
+            final Cake cake = new Cake.Builder().withColor(Cake.Color.YELLOW).withFlavor(Cake.Flavor.VANILLA).
+                    withFrostingFlavor(Cake.FrostingFlavor.VANILLA).withShape(Cake.Shape.SQUARE).withSize(Cake.Size.SMALL).build();
+
+            final String confMsg = app.order(balloons, cake);
+            Assert.assertNotNull(confMsg);
+            System.out.println(confMsg);
+        }
+    }
+
 }
